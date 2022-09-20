@@ -189,4 +189,4 @@ class GameViewController: UIViewController {
         ])
     }
 }
-var currentGameType = gameType.medium
+

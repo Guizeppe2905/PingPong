@@ -33,7 +33,6 @@ class GameScene: SKScene {
         self.addChild(background)
         ball = self.childNode(withName: "ball") as! SKSpriteNode
         ball.zPosition = 0.0
-      //  ball.physicsBody?.velocity = CGVector(dx: 10, dy: 10)
         player = self.childNode(withName: "player") as! SKSpriteNode
         player.position.y = (-self.frame.height / 2) + 70
         player.zPosition = 0.0
@@ -44,7 +43,6 @@ class GameScene: SKScene {
         playerScore.zPosition = 0.0
         enemyScore = self.childNode(withName: "enemyScore") as! SKLabelNode
         enemyScore.zPosition = 0.0
-      //  ball.physicsBody?.applyImpulse(CGVector(dx: 0, dy: 0))
         let border = SKPhysicsBody(edgeLoopFrom: self.frame)
         border.friction = 0
         border.restitution = 1
@@ -102,28 +100,12 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         
-//        switch currentGameType {
-//        case .easy:
-//            enemy.run(SKAction.moveTo(x: ball.position.x, duration: 1.3))
-//            break
-//        case .medium:
-//            enemy.run(SKAction.moveTo(x: ball.position.x, duration: 1.0))
-//            break
-//        case .hard:
-//            enemy.run(SKAction.moveTo(x: ball.position.x, duration: 0.7))
-//            break
-//        case .player2:
-//
-//            break
-//        }
-        
         enemy.run(SKAction.moveTo(x: ball.position.x, duration: 1.0))
         if UserSettings.shared.reset == true {
             ball.position = CGPoint(x: 0, y: 0)
             ball.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
             ball.physicsBody?.applyImpulse(CGVector(dx: 10, dy: 10))
             addScore(winner: player)
-          //  startGame()
             UserSettings.shared.reset = false
         }
         if ball.position.y <= player.position.y - 40 {
