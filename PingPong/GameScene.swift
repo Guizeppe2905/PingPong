@@ -10,20 +10,20 @@ import GameplayKit
 import Combine
 
 class GameScene: SKScene {
+
+    private var storage: Set<AnyCancellable> = []
+    private var score = PassthroughSubject<[Int], Never>()
+    private var subsciptions = Set<AnyCancellable>()
     
-    var storage: Set<AnyCancellable> = []
-    var background = SKSpriteNode(imageNamed: "background")
+    private var background = SKSpriteNode(imageNamed: "background")
+    private var ball = SKSpriteNode()
+    private var player = SKSpriteNode()
+    private var enemy = SKSpriteNode()
+    private var playerScore = SKLabelNode()
+    private var enemyScore = SKLabelNode()
+    private var playerPoints: Int = 0
+    private var enemyPoints: Int = 0
 
-    var ball = SKSpriteNode()
-    var player = SKSpriteNode()
-    var enemy = SKSpriteNode()
-    var playerScore = SKLabelNode()
-    var enemyScore = SKLabelNode()
-    var playerPoints: Int = 0
-    var enemyPoints: Int = 0
-
-    var score = PassthroughSubject<[Int], Never>()
-     
     override func didMove(to view: SKView) {
         background.position = CGPoint(x: 0, y: 0)
         background.size.width = self.size.width
@@ -50,7 +50,7 @@ class GameScene: SKScene {
         startGame()
     }
     
-    func startGame() {
+    private func startGame() {
         playerPoints = 0
         enemyPoints = 0
         score
@@ -61,21 +61,21 @@ class GameScene: SKScene {
             .store(in: &storage)
         score.send([playerPoints, enemyPoints])
         ball.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
-        ball.physicsBody?.applyImpulse(CGVector(dx: 15 , dy: 15))
+        setSpeedLevel(speed: currentSpeedLevel)
     }
 
-    func addScore(winner: SKSpriteNode) {
+    private func addScore(winner: SKSpriteNode) {
         if UserSettings.shared.reset == false {
             ball.position = CGPoint(x: 0, y: 0)
             ball.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
             if winner == player {
                 playerPoints += 1
                 score.send([playerPoints, enemyPoints])
-                ball.physicsBody?.applyImpulse(CGVector(dx: 15, dy: 15))
+                setSpeedLevel(speed: currentSpeedLevel)
             } else if winner == enemy {
                 enemyPoints += 1
                 score.send([playerPoints, enemyPoints])
-                ball.physicsBody?.applyImpulse(CGVector(dx: -15, dy: -15))
+                setSpeedLevel(speed: currentSpeedLevel)
             }
             score.send([playerPoints, enemyPoints])
         } else {
@@ -99,8 +99,7 @@ class GameScene: SKScene {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        
-        enemy.run(SKAction.moveTo(x: ball.position.x, duration: 1.0))
+        setEnemyLevel(enemyLevel: currentEnemyLevel)
         if UserSettings.shared.reset == true {
             ball.position = CGPoint(x: 0, y: 0)
             ball.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
@@ -113,6 +112,23 @@ class GameScene: SKScene {
         } else if ball.position.y >= enemy.position.y + 40 {
             addScore(winner: player)
         }
+        }
+    
+    private func setSpeedLevel(speed: speedLevel) {
+        if speed == .low {
+            ball.physicsBody?.applyImpulse(CGVector(dx: 10 , dy: 10))
+        } else if speed == .high {
+            ball.physicsBody?.applyImpulse(CGVector(dx: 20 , dy: 20))
+        }
+    }
+    
+    private func setEnemyLevel(enemyLevel: enemyLevel) {
+        if enemyLevel == .slowRider {
+            enemy.run(SKAction.moveTo(x: ball.position.x, duration: 1.2))
+        } else if enemyLevel == .topPlayer {
+            enemy.run(SKAction.moveTo(x: ball.position.x, duration: 0.0))
+        }
+    }
     }
 
-}
+
